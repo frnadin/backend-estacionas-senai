@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import cors from "cors";
 
 import pessoaRoutes from "./routes/pessoaRoutes.js";
+import veiculoRoutes from "./routes/veiculoRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use(
 );
 
 app.use(pessoaRoutes);
+app.use(veiculoRoutes);
 
 const start = async () => {
   try {

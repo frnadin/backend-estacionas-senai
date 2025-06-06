@@ -1,4 +1,4 @@
-import Pessoa from "../models/PessoaModel.js";
+import Pessoa from "../models/pessoaModel.js";
 
 const pessoaController = {
   async create(req, res) {

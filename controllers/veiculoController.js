@@ -1,5 +1,5 @@
-import Veiculo from "../models/veiculoModel.jss";
-import Pessoa from "../models/Pessoa.js";
+import Veiculo from "../models/veiculoModel.js";
+import Pessoa from "../models/pessoaModel.js";
 
 const veiculoController = {
   // Criar um novo veículo vinculado a uma pessoa
@@ -13,18 +13,26 @@ const veiculoController = {
         return res.status(404).json({ error: "Pessoa não encontrada" });
       }
 
-      const veiculo = await Veiculo.create({ plate, model, color, type, id_usuario });
+      const veiculo = await Veiculo.create({
+        plate,
+        model,
+        color,
+        type,
+        id_usuario,
+      });
       return res.status(201).json(veiculo);
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }
   },
 
-  // Buscar todos os veiculos com base no nome
+  // Buscar todos os veiculos
   async getAll(req, res) {
     try {
       const veiculos = await Veiculo.findAll({
-        include: [{ model: Pessoa, attributes: ["id", "name", "cpf", "email"] }],
+        include: [
+          { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
+        ],
       });
       return res.status(200).json(veiculos);
     } catch (error) {
@@ -37,7 +45,9 @@ const veiculoController = {
     try {
       const { id } = req.params;
       const veiculo = await Veiculo.findByPk(id, {
-        include: [{ model: Pessoa, attributes: ["id", "name", "cpf", "email"] }],
+        include: [
+          { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
+        ],
       });
 
       if (!veiculo) {
@@ -68,7 +78,13 @@ const veiculoController = {
         }
       }
 
-      await veiculo.update({ plate, model, color, type, id_usuario });
+      await veiculo.update({
+        plate: plate ?? veiculo.plate,
+        model: model ?? veiculo.model,
+        color: color ?? veiculo.color,
+        type: type ?? veiculo.type,
+        id_usuario: id_usuario ?? veiculo.id_usuario,
+      });
       return res.status(200).json(veiculo);
     } catch (error) {
       return res.status(400).json({ error: error.message });
@@ -86,7 +102,7 @@ const veiculoController = {
       }
 
       await veiculo.destroy();
-      return res.status(204).send();
+      return res.status(200).send({msg: "deleted"});
     } catch (error) {
       return res.status(400).json({ error: error.message });
     }

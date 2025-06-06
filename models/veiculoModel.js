@@ -1,6 +1,6 @@
 import { DataTypes } from "sequelize";
 import database from "../database.js";
-import Pessoa from "./Pessoa.js";
+import Pessoa from "./pessoaModel.js";
 
 const Veiculo = database.define(
   "Veiculos",
@@ -27,6 +27,15 @@ const Veiculo = database.define(
       type: DataTypes.ENUM("carro", "moto", "outro"),
       allowNull: false,
     },
+    ativo: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: true,
+    },
+    obs: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+
     id_usuario: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -46,6 +55,5 @@ const Veiculo = database.define(
 // Relacionamento (1 pessoa tem muitos veículos)
 Pessoa.hasMany(Veiculo, { foreignKey: "id_usuario" });
 Veiculo.belongsTo(Pessoa, { foreignKey: "id_usuario" });
-
 
 export default Veiculo;
