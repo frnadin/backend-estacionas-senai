@@ -5,6 +5,7 @@ import cors from "cors";
 
 import pessoaRoutes from "./routes/pessoaRoutes.js";
 import veiculoRoutes from "./routes/veiculoRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 
 dotenv.config();
 
@@ -27,6 +28,7 @@ app.use(
   })
 );
 
+app.use(authRoutes);
 app.use(pessoaRoutes);
 app.use(veiculoRoutes);
 

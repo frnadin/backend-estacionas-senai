@@ -1,5 +1,6 @@
 import { DataTypes } from "sequelize";
 import database from "../database.js";
+import bcrypt from "bcryptjs";
 
 const Pessoa = database.define(
   "Pessoa",
@@ -22,7 +23,7 @@ const Pessoa = database.define(
       },
     },
     type: {
-      type: DataTypes.ENUM("aluno", "professor", "funcionario"),
+      type: DataTypes.ENUM("aluno", "professor", "funcionario", "visitante", "administrador"),
       allowNull: false,
     },
     registrationSenai: {
@@ -50,6 +51,13 @@ const Pessoa = database.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      validate: {
+        len: [3, 100],
+      },
+    },
   },
   {
     tableName: "Pessoas",
@@ -57,6 +65,20 @@ const Pessoa = database.define(
     underscored: true,
   }
 );
+
+Pessoa.beforeCreate(async (pessoa) => {
+  if (pessoa.changed("password")) {
+    const salt = await bcrypt.genSalt(10);
+    pessoa.password = await bcrypt.hash(pessoa.password, salt);
+  }
+});
+
+Pessoa.beforeUpdate(async (pessoa) => {
+  if (pessoa.changed("password")) {
+    const salt = await bcrypt.genSalt(10);
+    pessoa.password = await bcrypt.hash(pessoa.password, salt);
+  }
+});
 
 export default Pessoa;
 

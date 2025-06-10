@@ -12,6 +12,7 @@ const pessoaController = {
         registrationSenai,
         phone,
         photo_url,
+        password,
       } = req.body;
       const pessoa = await Pessoa.create({
         name,
@@ -22,6 +23,7 @@ const pessoaController = {
         registrationSenai,
         phone,
         photo_url,
+        password
       });
       return res.status(201).json(pessoa);
     } catch (error) {
@@ -62,6 +64,7 @@ const pessoaController = {
         registrationSenai,
         phone,
         photo_url,
+        password
       } = req.body;
 
       const pessoa = await Pessoa.findByPk(id);
@@ -78,6 +81,7 @@ const pessoaController = {
         registrationSenai,
         phone,
         photo_url,
+        password,
       });
 
       return res.status(200).json(pessoa);

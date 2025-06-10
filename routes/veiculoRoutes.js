@@ -1,22 +1,41 @@
-import { Router } from 'express';
-import veiculoController from '../controllers/veiculoController.js';
-
-const router = Router()
+import { Router } from "express";
+import veiculoController from "../controllers/veiculoController.js";
+import { auth } from "../middlewares/authMiddleware.js";
+import { authorize } from "../middlewares/roleMiddleware.js";
+const router = Router();
 
 // Criar um veiculo
-router.post('/veiculos', veiculoController.create);
+router.post("/veiculos", auth, veiculoController.create);
 
-// Todos veiculos
-router.get('/veiculos', veiculoController.getAll);
+router.get(
+  "/veiculos",
+  auth,
+  authorize("administrador", "funcionario"),
+  veiculoController.getAll
+);
 
 // Obter um veiculo  por ID
-router.get('/veiculos/:id', veiculoController.getById);
+router.get(
+  "/veiculos/:id",
+  auth,
+  authorize("administrador", "funcionario"),
+  veiculoController.getById
+);
 
 // Atualiza pelo ID
-router.put('/veiculos/:id', veiculoController.update);
+router.put(
+  "/veiculos/:id",
+  auth,
+  authorize("administrador", "funcionario"),
+  veiculoController.update
+);
 
 // Deleta pelo ID
-router.delete('/veiculos/:id', veiculoController.delete);
+router.delete(
+  "/veiculos/:id",
+  auth,
+  authorize("administrador", "funcionario"),
+  veiculoController.delete
+);
 
-
-export default router
+export default router;
