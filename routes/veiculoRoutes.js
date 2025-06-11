@@ -8,6 +8,27 @@ const router = Router();
 router.post("/veiculos", auth, veiculoController.create);
 
 router.get(
+  "/veiculos/meus",
+  auth,
+  authorize("aluno", "professor"),
+  veiculoController.getMine
+);
+
+router.put(
+  "/veiculos/meus/:id",
+  auth,
+  authorize("aluno", "professor"),
+  veiculoController.updateMine
+);
+
+router.delete(
+  "/veiculos/meus/:id",
+  auth,
+  authorize("aluno", "professor"),
+  veiculoController.deleteMine
+);
+
+router.get(
   "/veiculos",
   auth,
   authorize("administrador", "funcionario"),
@@ -26,7 +47,7 @@ router.get(
 router.put(
   "/veiculos/:id",
   auth,
-  authorize("administrador", "funcionario"),
+  authorize("administrador", "funcionario", "aluno", "professor"),
   veiculoController.update
 );
 
@@ -34,7 +55,7 @@ router.put(
 router.delete(
   "/veiculos/:id",
   auth,
-  authorize("administrador", "funcionario"),
+  authorize("administrador", "funcionario", "aluno", "professor"),
   veiculoController.delete
 );
 
