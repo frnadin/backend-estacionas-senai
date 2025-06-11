@@ -1,116 +1,161 @@
+import Registro from "../models/registroModel.js";
+import Pessoa from "../models/pessoaModel.js";
+import Veiculo from "../models/veiculoModel.js";
+import {
+  VAGAS_MAXIMAS,
+  getVagasDisponiveis,
+} from "../services/estacionamentoService.js";
 
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
-// ////TERMINAR O CÓDIGO
+const registroController = {
+  // Criar um novo registro de entrada ou saída
+  async create(req, res) {
+    try {
+      const { pessoa_id, veiculo_id, tipo } = req.body;
 
-// import Registro from "../models/registroModel.js";
-// import Pessoa from "../models/pessoaModel.js";
-// import Veiculo from "../models/veiculoModel.js";
+      // Verifica se a pessoa e o veiculo existem
+      const pessoa = await Pessoa.findByPk(pessoa_id);
+      const veiculo = await Veiculo.findByPk(veiculo_id);
 
-// const VAGAS_MAXIMAS = 10;
+      if (!pessoa)
+        return res.status(404).json({ error: "Pessoa não encontrada" });
+      if (!veiculo)
+        return res.status(404).json({ error: "Veículo não encontrado" });
 
-// const registroController = {
-//   // Criar um novo registro de entrada ou saída
-//   async create(req, res) {
-//     try {
-//       const { pessoa_id, veiculo_id, tipo } = req.body;
+      // Verifica se o tipo é valid
+      if (!["entrada", "saida"].includes(tipo)) {
+        return res.status(400).json({ error: "Tipo inválido" });
+      }
 
-//       // Verifica se a pessoa e o veíveiculoculo existem
-//       const pessoa = await Pessoa.findByPk(pessoa_id);
-//       const veiculo = await Veiculo.findByPk(veiculo_id);
-      
-//       if (!pessoa)
-//         return res.status(404).json({ error: "Pessoa não encontrada" });
-//       if (!veiculo)
-//         return res.status(404).json({ error: "Veículo não encontrado" });
+      // Verifica se o veiculo esta ativo
+      if (!veiculo.ativo) {
+        const registro = await Registro.create({
+          pessoa_id,
+          veiculo_id,
+          tipo,
+          autorizado: false,
+          motivo_bloqueio: "Veículo inativo",
+        });
+        return res.status(403).json({ error: "Veículo inativo", registro });
+      }
 
-//       // Verifica se o veiculo esta ativo
-//       if (!veiculo.ativo) {
-//         const registro = await Registro.create({
-//           pessoa_id,
-//           veiculo_id,
-//           tipo,
-//           autorizado: false,
-//           motivo_bloqueio: "Veículo inativo",
-//         });
-//         return res.status(403).json({ error: "Veículo inativo", registro });
-//       }
+      const ultimosRegistro = await Registro.findOne({
+        where: { veiculo_id, autorizado: true },
+        order: [["data_hora", "DESC"]],
+      });
 
-//       // Verifica se o tipo é valid
-//       if (!["entrada", "saida"].includes(tipo)) {
-//         return res.status(400).json({ error: "Tipo inválido" });
-//       }
+      // Verifica se o veiculo ja esta dentro do estacionamento
+      if (tipo === "entrada" && ultimosRegistro?.tipo === "entrada") {
+        return res
+          .status(400)
+          .json({ error: "Veículo já está dentro do estacionamento" });
+      }
 
-//           // Verifica duplicidade de entrada
-//         if (tipo === "entrada") {
-//         const registrosEntrada = await Registro.count({
-//           where: {
-//             veiculo_id,
-//             tipo: "entrada",
-//             autorizado: true,
-//           },
-//           order: [["created_at", "DESC"]],
-//         });
+      // Evita saida sem entrada
+      if (
+        tipo === "saida" &&
+        (!ultimosRegistro || ultimosRegistro.tipo !== "entrada")
+      ) {
+        return res
+          .status(400)
+          .json({ error: "Veículo não está dentro do estacionamento" });
+      }
 
-//         const registrosSaida = await Registro.count({
-//           where: {
-//             veiculo_id,
-//             tipo: "saida",
-//             autorizado: true,
-//           },
-//           order: [["created_at", "DESC"]],
-//         });
+      // Verifica se o estacionamento esta lotadasso
+      if (tipo === "entrada") {
+        const vagasDisponiveis = await getVagasDisponiveis();
 
-//       const registro = await Registro.create({
-//         pessoa_id,
-//         veiculo_id,
-//         tipo,
-//       });
+        if (vagasDisponiveis <= 0) {
+          const registro = await Registro.create({
+            pessoa_id,
+            veiculo_id,
+            tipo,
+            autorizado: false,
+            motivo_bloqueio: "Estacionamento cheio",
+          });
+          return res
+            .status(403)
+            .json({ error: "Estacionamento cheio", registro });
+        }
+      }
 
-//       return res.status(201).json(registro);
-//     } catch (error) {
-//       return res.status(400).json({ error: error.message });
-//     }
-//   },
+      // Cria o registro
+      const registro = await Registro.create({
+        pessoa_id,
+        veiculo_id,
+        tipo,
+        autorizado: true,
+      });
 
-//   // Buscar todos os registros
-//   async getAll(req, res) {
-//     try {
-//       const registros = await Registro.findAll({
-//         include: [
-//           { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
-//           { model: Veiculo, attributes: ["id", "plate", "model", "color"] },
-//         ],
-//       });
-//       return res.status(200).json(registros);
-//     } catch (error) {
-//       return res.status(400).json({ error: error.message });
-//     }
-//   },
+      return res.status(201).json(registro);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  },
 
-//   // Buscar um registro por ID
-//   async getById(req, res) {
-//     try {
-//       const { id } = req.params;
-//       const registro = await Registro.findByPk(id, {
-//         include: [
-//           { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
-//           { model: Veiculo, attributes: ["id", "plate", "model", "color"] },
-//         ],
-//       });
+  // Listar todos os registros
+  async getAll(req, res) {
+    try {
+      const registros = await Registro.findAll({
+        include: [
+          { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
+          { model: Veiculo, attributes: ["id", "plate", "model", "color"] },
+        ],
+        order: [["data_hora", "DESC"]],
+      });
+      return res.status(200).json(registros);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  },
 
-//       if (!registro) {
-//         return res.status(404).json({ error: "Registro não encontrado" });
-//       }
+  // Listar registros por pessoa
+  async getByPessoa(req, res) {
+    try {
+      const { pessoa_id } = req.params;
+      const registros = await Registro.findAll({
+        where: { pessoa_id },
+        include: [
+          { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
+          { model: Veiculo, attributes: ["id", "plate", "model", "color"] },
+        ],
+        order: [["data_hora", "DESC"]],
+      });
+      return res.status(200).json(registros);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  },
+  async getByVeiculo(req, res) {
+    try {
+      const { veiculo_id } = req.params;
+      const registros = await Registro.findAll({
+        where: { veiculo_id },
+        include: [
+          { model: Pessoa, attributes: ["id", "name", "cpf", "email"] },
+          { model: Veiculo, attributes: ["id", "plate", "model", "color"] },
+        ],
+        order: [["data_hora", "DESC"]],
+      });
+      return res.status(200).json(registros);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  },
 
-//       return res.status(200).json(registro);
-//     } catch (error) {
-//       return res.status(400).json({ error: error.message });
-//     }
-//   },
-// };
+  async vagasDisponiveis(req, res) {
+  try {
+    const vagas = await getVagasDisponiveis();
+    const vagasOcupadas = VAGAS_MAXIMAS - vagas;
+
+    return res.status(200).json({
+      vagas_disponiveis: vagas,
+      vagas_ocupadas: vagasOcupadas,
+      vagas_totais: VAGAS_MAXIMAS,
+    });
+  } catch (error) {
+    return res.status(500).json({ error: "Erro ao calcular vagas disponíveis" });
+  }
+}
+};
+
+export default registroController;

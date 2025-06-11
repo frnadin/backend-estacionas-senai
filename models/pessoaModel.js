@@ -53,7 +53,7 @@ const Pessoa = database.define(
     },
     password: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
       validate: {
         len: [3, 100],
       },
