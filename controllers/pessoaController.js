@@ -1,4 +1,4 @@
-import Pessoa from "../models/pessoaModel.js";
+import { Pessoa, Veiculo, Permissao, Registro } from '../models/index.js';
 
 const pessoaController = {
   async create(req, res) {

@@ -80,5 +80,6 @@ Pessoa.beforeUpdate(async (pessoa) => {
   }
 });
 
+
 export default Pessoa;
 

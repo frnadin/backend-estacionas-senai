@@ -1,8 +1,9 @@
 import { DataTypes } from "sequelize";
 import database from "../database.js";
 
-const Registro = database.define(
-  "Registros",
+
+const Permissao = database.define(
+  "Permissao",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -13,7 +14,7 @@ const Registro = database.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: "Pessoas",
+        model: "Pessoas", 
         key: "id",
       },
     },
@@ -25,29 +26,24 @@ const Registro = database.define(
         key: "id",
       },
     },
-    tipo: {
-      type: DataTypes.ENUM("entrada", "saida"),
-      allowNull: false,
-    },
-    data_hora: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
     autorizado: {
       type: DataTypes.BOOLEAN,
-      defaultValue: true,
+      defaultValue: false,
+    },
+    validade: {
+      type: DataTypes.DATE,
+      allowNull: false,
     },
     motivo_bloqueio: {
       type: DataTypes.STRING,
-      allowNull: true, // "veiculo não autorizado" "Estacionamento cheio" ...
+      allowNull: true,
     },
   },
   {
-    tableName: "Registros",
+    tableName: "Permissoes",
     timestamps: true,
-    underscored: true,
   }
 );
 
-export default Registro;
+
+export default Permissao;

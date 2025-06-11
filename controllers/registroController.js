@@ -1,6 +1,6 @@
-import Registro from "../models/registroModel.js";
-import Pessoa from "../models/pessoaModel.js";
-import Veiculo from "../models/veiculoModel.js";
+import { Pessoa, Veiculo, Permissao, Registro } from '../models/index.js';
+
+
 import {
   VAGAS_MAXIMAS,
   getVagasDisponiveis,
@@ -37,6 +37,25 @@ const registroController = {
         });
         return res.status(403).json({ error: "Veículo inativo", registro });
       }
+
+      const permissao = await Permissao.findOne({
+        where: { pessoa_id, veiculo_id, autorizado: true },
+        order: [["validade", "DESC"]],
+      });
+
+      if (!permissao) {
+        const registro = await Registro.create({
+          pessoa_id,
+          veiculo_id,
+          tipo,
+          autorizado: false,
+          motivo_bloqueio: "Permissão não encontrada ou não autorizada",
+        });
+        return res.status(403).json({
+          error: "Permissão não encontrada ou não autorizada",
+          registro,
+        });
+      } // Fecha o if aqui
 
       const ultimosRegistro = await Registro.findOne({
         where: { veiculo_id, autorizado: true },
@@ -143,19 +162,21 @@ const registroController = {
   },
 
   async vagasDisponiveis(req, res) {
-  try {
-    const vagas = await getVagasDisponiveis();
-    const vagasOcupadas = VAGAS_MAXIMAS - vagas;
+    try {
+      const vagas = await getVagasDisponiveis();
+      const vagasOcupadas = VAGAS_MAXIMAS - vagas;
 
-    return res.status(200).json({
-      vagas_disponiveis: vagas,
-      vagas_ocupadas: vagasOcupadas,
-      vagas_totais: VAGAS_MAXIMAS,
-    });
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao calcular vagas disponíveis" });
-  }
-}
+      return res.status(200).json({
+        vagas_disponiveis: vagas,
+        vagas_ocupadas: vagasOcupadas,
+        vagas_totais: VAGAS_MAXIMAS,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Erro ao calcular vagas disponíveis" });
+    }
+  },
 };
 
 export default registroController;

@@ -1,5 +1,5 @@
-import Veiculo from "../models/veiculoModel.js";
-import Pessoa from "../models/pessoaModel.js";
+import { Pessoa, Veiculo, Permissao, Registro } from '../models/index.js';
+
 
 const veiculoController = {
   // Criar um novo veículo vinculado a uma pessoa

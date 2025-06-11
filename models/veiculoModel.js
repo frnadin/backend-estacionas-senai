@@ -1,6 +1,5 @@
 import { DataTypes } from "sequelize";
 import database from "../database.js";
-import Pessoa from "./pessoaModel.js";
 
 const Veiculo = database.define(
   "Veiculos",
@@ -40,7 +39,7 @@ const Veiculo = database.define(
       type: DataTypes.INTEGER,
       allowNull: false,
       references: {
-        model: Pessoa,
+        model: "Pessoas", 
         key: "id",
       },
     },
@@ -51,9 +50,5 @@ const Veiculo = database.define(
     underscored: true,
   }
 );
-
-// Relacionamento (1 pessoa tem muitos veículos)
-Pessoa.hasMany(Veiculo, { foreignKey: "id_usuario" });
-Veiculo.belongsTo(Pessoa, { foreignKey: "id_usuario" });
 
 export default Veiculo;

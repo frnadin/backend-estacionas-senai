@@ -1,4 +1,4 @@
-import Pessoa from "../models/pessoaModel.js";
+import { Pessoa, Veiculo, Permissao, Registro } from '../../estacionamento-api/models/index.js';
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
