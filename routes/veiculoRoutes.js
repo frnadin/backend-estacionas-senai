@@ -5,8 +5,17 @@ import { authorize } from "../middlewares/roleMiddleware.js";
 const router = Router();
 
 // Criar um veiculo
-router.post("/veiculos", auth, veiculoController.create);
+router.post(
+  "/veiculos",
+  auth,
+  authorize("administrador", "funcionario"),
+  veiculoController.create
+);
 
+// Criar um veiculo vinculado ao usuário autenticado
+router.post("/veiculos/meus", auth, veiculoController.createMine);
+
+// Obter todos os veiculos do usuário autenticado
 router.get(
   "/veiculos/meus",
   auth,

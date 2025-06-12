@@ -36,6 +36,31 @@ const veiculoController = {
     }
   },
 
+  async createMine(req, res) {
+    try {
+      const { plate, model, color, type, obs } = req.body;
+      const idPessoa = req.user.id;
+
+      const pessoa = await Pessoa.findByPk(idPessoa);
+      if (!pessoa) {
+        return res.status(404).json({ error: "Pessoa não encontrada" });
+      }
+
+      const veiculo = await Veiculo.create({
+        plate,
+        model,
+        color,
+        type,
+        obs,
+        id_usuario: idPessoa,
+      });
+
+      return res.status(201).json(veiculo);
+    } catch (error) {
+      return res.status(400).json({ error: error.message });
+    }
+  },
+
   // Buscar todos os veiculos
   // Restringe a visualização de veículos com base no papel do usuário
 
@@ -193,7 +218,7 @@ const veiculoController = {
         model: model ?? veiculo.model,
         color: color ?? veiculo.color,
         type: type ?? veiculo.type,
-        obs: obs ?? veiculo.obs
+        obs: obs ?? veiculo.obs,
       });
 
       return res.status(200).json(veiculo);
