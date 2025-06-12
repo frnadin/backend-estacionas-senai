@@ -47,7 +47,7 @@ router.get(
 router.put(
   "/veiculos/:id",
   auth,
-  authorize("administrador", "funcionario", "aluno", "professor"),
+  authorize("administrador", "funcionario"),
   veiculoController.update
 );
 
@@ -55,7 +55,7 @@ router.put(
 router.delete(
   "/veiculos/:id",
   auth,
-  authorize("administrador", "funcionario", "aluno", "professor"),
+  authorize("administrador", "funcionario"),
   veiculoController.delete
 );
 
