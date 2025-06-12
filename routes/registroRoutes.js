@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
   "/registros",
   auth,
-  authorize("administrador", "funcionario"),
+  authorize("administrador", "funcionario", "aluno", "professor"),
   registroController.create
 );
 

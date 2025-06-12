@@ -1,5 +1,5 @@
-import { Pessoa, Veiculo, Permissao, Registro } from '../models/index.js';
-
+import { Pessoa, Veiculo, Permissao, Registro } from "../models/index.js";
+import { Op } from "sequelize";
 
 import {
   VAGAS_MAXIMAS,
@@ -9,12 +9,16 @@ import {
 const registroController = {
   // Criar um novo registro de entrada ou saída
   async create(req, res) {
+    // console.log("Registro de entrada/saída solicitado:", req.body);
+    // console.log("Usuário autenticado:", req.user);
+
     try {
       const { pessoa_id, veiculo_id, tipo } = req.body;
 
       // Verifica se a pessoa e o veiculo existem
       const pessoa = await Pessoa.findByPk(pessoa_id);
       const veiculo = await Veiculo.findByPk(veiculo_id);
+      console.log(veiculo.toJSON());
 
       if (!pessoa)
         return res.status(404).json({ error: "Pessoa não encontrada" });
@@ -38,24 +42,48 @@ const registroController = {
         return res.status(403).json({ error: "Veículo inativo", registro });
       }
 
-      const permissao = await Permissao.findOne({
-        where: { pessoa_id, veiculo_id, autorizado: true },
-        order: [["validade", "DESC"]],
-      });
+      // Verificação por regra de perfil
+      if (["aluno", "professor"].includes(req.user.type)) {
+        // Veículo deve pertencer ao usuário
+        if (Number(veiculo.id_usuario) !== Number(req.user.id)) {
+          const registro = await Registro.create({
+            pessoa_id,
+            veiculo_id,
+            tipo,
+            autorizado: false,
+            motivo_bloqueio: "Veículo não pertence ao usuário",
+          });
+          return res.status(403).json({
+            error: "Veículo não pertence ao usuário",
+            registro,
+          });
+        }
+        // Prossegue sem exigir Permissao
+      } else {
+        // Demais cargos precisam ter permissão válida
+        const permissao = await Permissao.findOne({
+          where: {
+            pessoa_id,
+            veiculo_id,
+            autorizado: true,
+          },
+          order: [["validade", "DESC"]],
+        });
 
-      if (!permissao) {
-        const registro = await Registro.create({
-          pessoa_id,
-          veiculo_id,
-          tipo,
-          autorizado: false,
-          motivo_bloqueio: "Permissão não encontrada ou não autorizada",
-        });
-        return res.status(403).json({
-          error: "Permissão não encontrada ou não autorizada",
-          registro,
-        });
-      } // Fecha o if aqui
+        if (!permissao) {
+          const registro = await Registro.create({
+            pessoa_id,
+            veiculo_id,
+            tipo,
+            autorizado: false,
+            motivo_bloqueio: "Permissão não encontrada ou não autorizada",
+          });
+          return res.status(403).json({
+            error: "Permissão não encontrada ou não autorizada",
+            registro,
+          });
+        }
+      }
 
       const ultimosRegistro = await Registro.findOne({
         where: { veiculo_id, autorizado: true },
