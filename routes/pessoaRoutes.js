@@ -5,10 +5,8 @@ import { authorize } from '../middlewares/roleMiddleware.js';
 
 const router = Router();
 
-// Criar uma nova pessoa 
-router.post('/pessoas', pessoaController.create);
-
 // Rotas protegidas
+router.post('/pessoas', auth, authorize('administrador', 'funcionario'), pessoaController.create);
 router.get('/pessoas', auth, authorize('administrador', 'funcionario'), pessoaController.getAll);
 router.get('/pessoas/:id', auth, authorize('administrador', 'funcionario'), pessoaController.getById);
 router.put('/pessoas/:id', auth, authorize('administrador', 'funcionario'), pessoaController.update);

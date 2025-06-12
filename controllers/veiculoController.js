@@ -4,7 +4,7 @@ const veiculoController = {
   // Criar um novo veículo vinculado a uma pessoa
   async create(req, res) {
     try {
-      const { plate, model, color, type, id_usuario } = req.body;
+      const { plate, model, color, type, id_usuario, obs } = req.body;
       let idPessoa;
 
       if (req.user.role === "aluno" || req.user.role === "professor") {
@@ -26,6 +26,7 @@ const veiculoController = {
         model,
         color,
         type,
+        obs,
         id_usuario: idPessoa,
       });
 
@@ -87,7 +88,7 @@ const veiculoController = {
   async update(req, res) {
     try {
       const { id } = req.params;
-      const { plate, model, color, type, id_usuario } = req.body;
+      const { plate, model, color, type, id_usuario, obs } = req.body;
 
       const veiculo = await Veiculo.findByPk(id);
       if (!veiculo) {
@@ -124,6 +125,7 @@ const veiculoController = {
         model: model ?? veiculo.model,
         color: color ?? veiculo.color,
         type: type ?? veiculo.type,
+        obs: obs ?? veiculo.obs,
         id_usuario: novoIdUsuario,
       });
 
@@ -175,7 +177,7 @@ const veiculoController = {
   async updateMine(req, res) {
     try {
       const { id } = req.params;
-      const { plate, model, color, type } = req.body;
+      const { plate, model, color, type, obs } = req.body;
 
       const veiculo = await Veiculo.findByPk(id);
       if (!veiculo) {
@@ -191,6 +193,7 @@ const veiculoController = {
         model: model ?? veiculo.model,
         color: color ?? veiculo.color,
         type: type ?? veiculo.type,
+        obs: obs ?? veiculo.obs
       });
 
       return res.status(200).json(veiculo);

@@ -7,6 +7,7 @@ import pessoaRoutes from "./routes/pessoaRoutes.js";
 import veiculoRoutes from "./routes/veiculoRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import registroRoutes from "./routes/registroRoutes.js";
+import permissaoRoutes from "./routes/permissaoRoutes.js"
 
 dotenv.config();
 
@@ -33,6 +34,7 @@ app.use(authRoutes);
 app.use(pessoaRoutes);
 app.use(veiculoRoutes);
 app.use(registroRoutes); 
+app.use(permissaoRoutes); 
 
 const start = async () => {
   try {
