@@ -12,6 +12,8 @@ Bem-vindo ao repositório do backend do ParkZone Senai! Este projeto é um siste
 ![Dotenv](https://img.shields.io/badge/Dotenv-ENV-green?style=for-the-badge)
 ![Bcrypt](https://img.shields.io/badge/Bcrypt-Encryption-orange?style=for-the-badge)
 
+---
+
 
 ## 🧠 Funcionalidades Chave
 
@@ -43,6 +45,9 @@ Bem-vindo ao repositório do backend do ParkZone Senai! Este projeto é um siste
 - Verificação de Permissão em Tempo Real: Verifica as permissões no momento da tentativa de entrada
 - Log Detalhado: Registra entradas/saídas autorizadas ou bloqueadas com seus respectivos motivos
 
+---
+
+
 ## 🔐 Estrutura do Token JWT
 
 O token JWT gerado após o login inclui os seguintes dados:
@@ -69,41 +74,65 @@ Authorization: Bearer SEU_TOKEN_AQUI
 ├── app.js
 └── server.js
 ```
+---
 
-### 📌 Rotas Principais
-Auth
+## 📌 Rotas Principais
+#### 🔐 Auth
 ```text
-Método	Rota	Descrição
-POST	/login	Autenticação e geração de token
+| Método | Rota     | Descrição                |
+|--------|----------|--------------------------|
+| POST   | `/login` | Autenticação             |
 ```
-Pessoas
+#### 👤 Pessoas
 ```text
-Método	Rota	Descrição
-GET	/pessoas	Listar todas as pessoas
-POST	/pessoas	Criar uma nova pessoa
-```
 
-Veículos
-```text
-Método	Rota	Descrição
-GET	/veiculos	Listar todos os veículos
-POST	/veiculos	Cadastrar um novo veículo
-```
-
-Permissões
-```text
-Método	Rota	Descrição
-POST	/permissoes	Criar uma nova permissão
-GET	/permissoes	Listar todas as permissões
+| Método | Rota           | Descrição                        | Acesso |
+|--------|----------------|----------------------------------|--------|
+| GET    | `/pessoas`     | Lista todas as pessoas           | ADM    |
+| GET    | `/pessoas/:id` | Lista pessoa por ID              | ADM    |
+| POST   | `/pessoas`     | Cria uma nova pessoa             | ADM    |
+| PUT    | `/pessoas/:id` | Edita pessoa por ID              | ADM    |
+| DELETE | `/pessoas/:id` | Remove pessoa por ID             | ADM    |
+| GET    | `/pessoas/eu`  | Retorna dados do usuário logado  | Usuário|
 ```
 
-
-Registros
+#### 🚗 Veículos
 ```text
-Método	Rota	Descrição
-POST	/registros	Criar um registro de entrada ou saída
-GET	/registros	Listar todos os registros
+
+| Método | Rota                | Descrição                             | Acesso  |
+|--------|---------------------|---------------------------------------|---------|
+| GET    | `/veiculos`         | Lista todos os veículos               | ADM     |
+| GET    | `/veiculos/meus`    | Lista veículos do usuário autenticado | Usuário |
+| POST   | `/veiculos`         | Cria veículo para usuário (ADM)       | ADM     |
+| POST   | `/veiculos/meus`    | Cria veículo próprio                  | Usuário |
+| PUT    | `/veiculos/meus/:id`| Edita veículo próprio                 | Usuário |
+| DELETE | `/veiculos/meus/:id`| Remove veículo próprio                | Usuário |
+
 ```
+
+#### 🛡️ Permissões
+```text
+
+| Método | Rota          | Descrição                      | Acesso |
+|--------|---------------|--------------------------------|--------|
+| POST   | `/permissoes` | Cria nova permissão de acesso  | ADM    |
+| GET    | `/permissoes` | Lista todas as permissões      | ADM    |
+```
+
+
+#### 📋 Registros de Entrada/Saída
+```text
+
+| Método | Rota                              | Descrição                                    | Acesso  |
+|--------|-----------------------------------|----------------------------------------------|---------|
+| POST   | `/registros`                      | Cria registro de entrada ou saída            | Usuário |
+| POST   | `/registros/admin`                | Cria registro para terceiros (ADM)           | ADM     |
+| GET    | `/registros/vagas-disponiveis`    | Consulta vagas disponíveis no estacionamento | Ambos   |
+
+```
+
+---
+
 ### ⚙️ Variáveis de Ambiente (.env)
 
 Antes de rodar o projeto, configure as seguintes variáveis de ambiente em um arquivo .env na raiz do diretório:
@@ -143,7 +172,7 @@ Configure o arquivo .env: Crie um arquivo .env na raiz e adicione as variáveis 
 
 Este projeto foi desenvolvido como parte dos requisitos de conclusão do Curso Técnico em Desenvolvimento de Sistemas do SENAI São José (SC) – 1º semestre de 2025.
 
-Desenvolvido por [Fernando](https://github.com/frnadin)  
+Desenvolvido por [Fernando](https://github.com/frnadin)  & [João Marques](https://github.com/maarqsz)
 
 
 [![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)](https://github.com/frnadin)
