@@ -5,12 +5,19 @@ import { authorize } from "../middlewares/roleMiddleware.js";
 
 const router = express.Router();
 
-// Criar registro — só admins e funcionários
+// Criar registros
 router.post(
   "/registros",
   auth,
-  authorize("administrador", "funcionario", "aluno", "professor"),
-  registroController.create
+  registroController.createByUser
+);
+
+// Registro por admins e funcionários (qualquer pessoa/veículo)
+router.post(
+  "/registros/admin",
+  auth,
+  authorize("administrador", "funcionario"),
+  registroController.createByAdmin
 );
 
 // Listar todos os registros — só admins e funcionários

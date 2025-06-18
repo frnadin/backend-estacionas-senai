@@ -8,6 +8,126 @@ import {
 
 const registroController = {
   // Criar um novo registro de entrada ou saída
+  async createByUser(req, res) {
+    try {
+      const { pessoa_id, veiculo_id, tipo } = req.body;
+
+      // Verifica se o tipo é válido
+      if (!["entrada", "saida"].includes(tipo)) {
+        return res.status(400).json({ error: "Tipo inválido" });
+      }
+
+      const pessoa = await Pessoa.findByPk(pessoa_id);
+      const veiculo = await Veiculo.findByPk(veiculo_id);
+
+      if (!pessoa || !veiculo) {
+        return res
+          .status(404)
+          .json({ error: "Pessoa ou veículo não encontrado" });
+      }
+
+      if (pessoa.id !== req.user.id || veiculo.id_usuario !== req.user.id) {
+        return res.status(403).json({
+          error:
+            "Você só pode registrar sua própria entrada/saída com seu veículo",
+        });
+      }
+
+      if (!veiculo.ativo) {
+        const registro = await Registro.create({
+          pessoa_id,
+          veiculo_id,
+          tipo,
+          autorizado: false,
+          motivo_bloqueio: "Veículo inativo",
+        });
+        return res.status(403).json({ error: "Veículo inativo", registro });
+      }
+
+      const permissao = await Permissao.findOne({
+        where: {
+          pessoa_id,
+          veiculo_id,
+          autorizado: true,
+        },
+        order: [["validade", "DESC"]],
+      });
+
+      if (!permissao) {
+        const registro = await Registro.create({
+          pessoa_id,
+          veiculo_id,
+          tipo,
+          autorizado: false,
+          motivo_bloqueio: "Permissão não encontrada",
+        });
+        return res
+          .status(403)
+          .json({ error: "Permissão não encontrada", registro });
+      }
+
+      // Mesma lógica de entrada/saída duplicada e estacionamento cheio
+      return await criarRegistroComValidacoes(pessoa_id, veiculo_id, tipo, res);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
+  async createByAdmin(req, res) {
+    try {
+      const { pessoa_id, veiculo_id, tipo } = req.body;
+
+      if (!["entrada", "saida"].includes(tipo)) {
+        return res.status(400).json({ error: "Tipo inválido" });
+      }
+
+      const pessoa = await Pessoa.findByPk(pessoa_id);
+      const veiculo = await Veiculo.findByPk(veiculo_id);
+
+      if (!pessoa || !veiculo) {
+        return res
+          .status(404)
+          .json({ error: "Pessoa ou veículo não encontrado" });
+      }
+
+      if (!veiculo.ativo) {
+        const registro = await Registro.create({
+          pessoa_id,
+          veiculo_id,
+          tipo,
+          autorizado: false,
+          motivo_bloqueio: "Veículo inativo",
+        });
+        return res.status(403).json({ error: "Veículo inativo", registro });
+      }
+
+      const permissao = await Permissao.findOne({
+        where: {
+          pessoa_id,
+          veiculo_id,
+          autorizado: true,
+        },
+        order: [["validade", "DESC"]],
+      });
+
+      if (!permissao) {
+        const registro = await Registro.create({
+          pessoa_id,
+          veiculo_id,
+          tipo,
+          autorizado: false,
+          motivo_bloqueio: "Permissão não encontrada",
+        });
+        return res
+          .status(403)
+          .json({ error: "Permissão não encontrada", registro });
+      }
+
+      // Entrada/Saída, vagas e registros anteriores
+      return await criarRegistroComValidacoes(pessoa_id, veiculo_id, tipo, res);
+    } catch (error) {
+      return res.status(500).json({ error: error.message });
+    }
+  },
   async create(req, res) {
     // console.log("Registro de entrada/saída solicitado:", req.body);
     // console.log("Usuário autenticado:", req.user);
@@ -208,3 +328,48 @@ const registroController = {
 };
 
 export default registroController;
+
+async function criarRegistroComValidacoes(pessoa_id, veiculo_id, tipo, res) {
+  const ultimosRegistro = await Registro.findOne({
+    where: { veiculo_id, autorizado: true },
+    order: [["data_hora", "DESC"]],
+  });
+
+  if (tipo === "entrada" && ultimosRegistro?.tipo === "entrada") {
+    return res
+      .status(400)
+      .json({ error: "Veículo já está dentro do estacionamento" });
+  }
+
+  if (
+    tipo === "saida" &&
+    (!ultimosRegistro || ultimosRegistro.tipo !== "entrada")
+  ) {
+    return res
+      .status(400)
+      .json({ error: "Veículo não está dentro do estacionamento" });
+  }
+
+  if (tipo === "entrada") {
+    const vagasDisponiveis = await getVagasDisponiveis();
+    if (vagasDisponiveis <= 0) {
+      const registro = await Registro.create({
+        pessoa_id,
+        veiculo_id,
+        tipo,
+        autorizado: false,
+        motivo_bloqueio: "Estacionamento cheio",
+      });
+      return res.status(403).json({ error: "Estacionamento cheio", registro });
+    }
+  }
+
+  const registro = await Registro.create({
+    pessoa_id,
+    veiculo_id,
+    tipo,
+    autorizado: true,
+  });
+
+  return res.status(201).json(registro);
+}
