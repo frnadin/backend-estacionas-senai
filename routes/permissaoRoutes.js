@@ -1,8 +1,15 @@
-import { Router } from "express";  
+import { Router } from "express";
 import permissaoController from "../controllers/permissaoController.js";
+import { auth } from "../middlewares/authMiddleware.js";
+import { authorize } from "../middlewares/roleMiddleware.js";
 
 const router = Router();
 
-router.post('/permissoes', permissaoController.create)
+router.post(
+  "/permissoes",
+  auth,
+  authorize("administrador", "funcionario"),
+  permissaoController.create
+);
 
-export default router
+export default router;

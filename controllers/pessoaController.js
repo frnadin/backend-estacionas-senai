@@ -52,6 +52,22 @@ const pessoaController = {
       return res.status(400).json({ error: error.message });
     }
   },
+
+  async getMine(req, res) {
+  try {
+    const { id } = req.user;
+
+    const pessoa = await Pessoa.findByPk(id);
+    if (!pessoa) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    return res.status(200).json(pessoa);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+},
+
   async update(req, res) {
     try {
       const { id } = req.params;
