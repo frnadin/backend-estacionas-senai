@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
-import Pessoa from './models/pessoaModel.js'; 
-import database from './database.js';    
+import Pessoa from '../models/pessoaModel.js'; 
+import database from '../database.js';    
 
 async function updatePasswords() {
   try {

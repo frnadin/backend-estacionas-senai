@@ -20,7 +20,7 @@ app.use(
   cors({
     origin: (origin, callback) => {
       if (!origin) return callback(null, true);
-      const allowedOrigins = [`http://localhost:${PORT}`];
+      const allowedOrigins = [`http://localhost:5173`];
       const allowed = allowedOrigins.includes(origin);
       allowed
         ? callback(null, true)
