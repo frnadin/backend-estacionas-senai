@@ -68,4 +68,11 @@ router.delete(
   veiculoController.delete
 );
 
+router.get(
+  "/veiculos/dono/:id",
+  auth,
+  authorize("administrador", "funcionario"),
+  veiculoController.getVeiculosPorPessoa
+);
+
 export default router;

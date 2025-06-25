@@ -245,6 +245,29 @@ const veiculoController = {
       return res.status(400).json({ error: error.message });
     }
   },
+  async getVeiculosPorPessoa(req, res) {
+  try {
+    const { id } = req.params;
+
+    // Buscar veículos onde id_usuario = pessoaId
+    const veiculos = await Veiculo.findAll({
+      where: { id_usuario: id },
+      include: [
+        { model: Pessoa, attributes: ["id", "name", "cpf", "email"] }
+      ]
+    });
+
+    if (!veiculos || veiculos.length === 0) {
+      return res.status(404).json({ error: "Nenhum veículo encontrado para essa pessoa" });
+    }
+
+    return res.status(200).json(veiculos);
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+}
 };
+
+
 
 export default veiculoController;
