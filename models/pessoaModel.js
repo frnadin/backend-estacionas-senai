@@ -31,9 +31,9 @@ const Pessoa = database.define(
       allowNull: false,
       unique: true,
     },
-    age: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
+    birth: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
     email: {
       type: DataTypes.STRING,

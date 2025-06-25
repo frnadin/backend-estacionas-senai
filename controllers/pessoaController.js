@@ -7,23 +7,23 @@ const pessoaController = {
         name,
         cpf,
         type,
-        age,
         email,
         registrationSenai,
         phone,
         photo_url,
         password,
+        birth
       } = req.body;
       const pessoa = await Pessoa.create({
         name,
         cpf,
         type,
-        age,
         email,
         registrationSenai,
         phone,
         photo_url,
-        password
+        password,
+        birth
       });
       return res.status(201).json(pessoa);
     } catch (error) {
@@ -75,12 +75,12 @@ const pessoaController = {
         name,
         cpf,
         type,
-        age,
         email,
         registrationSenai,
         phone,
         photo_url,
-        password
+        password,
+        birth,
       } = req.body;
 
       const pessoa = await Pessoa.findByPk(id);
@@ -92,12 +92,12 @@ const pessoaController = {
         name,
         cpf,
         type,
-        age,
         email,
         registrationSenai,
         phone,
         photo_url,
         password,
+        birth
       });
 
       return res.status(200).json(pessoa);
