@@ -19,7 +19,6 @@ router.post("/veiculos/meus", auth, veiculoController.createMine);
 router.get(
   "/veiculos/meus",
   auth,
-  authorize("aluno", "professor"),
   veiculoController.getMine
 );
 

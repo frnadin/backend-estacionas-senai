@@ -26,11 +26,13 @@ const registroController = {
           .json({ error: "Pessoa ou veículo não encontrado" });
       }
 
-      if (pessoa.id !== req.user.id || veiculo.id_usuario !== req.user.id) {
-        return res.status(403).json({
-          error:
-            "Você só pode registrar sua própria entrada/saída com seu veículo",
-        });
+      if (req.user.type !== "administrador") {
+        if (pessoa.id !== req.user.id || veiculo.id_usuario !== req.user.id) {
+          return res.status(403).json({
+            error:
+              "Você só pode registrar sua própria entrada/saída com seu veículo",
+          });
+        }
       }
 
       if (!veiculo.ativo) {
