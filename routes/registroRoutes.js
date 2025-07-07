@@ -51,4 +51,11 @@ router.get(
   registroController.vagasDisponiveis
 );
 
+router.get(
+  "/registros/abertos",
+  auth,
+  authorize("administrador", "funcionario"),
+  registroController.getAbertos
+);
+
 export default router;

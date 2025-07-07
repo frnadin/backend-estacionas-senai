@@ -327,6 +327,36 @@ const registroController = {
         .json({ error: "Erro ao calcular vagas disponíveis" });
     }
   },
+
+  async getAbertos(req, res) {
+    try {
+      // Busca o ÚLTIMO registro autorizado de cada veículo
+      const registros = await Registro.findAll({
+        where: { autorizado: true },
+        include: [{ model: Veiculo }, { model: Pessoa }],
+        order: [["data_hora", "DESC"]],
+      });
+
+      // Filtra para só mostrar veículos cujo último registro é 'entrada'
+      const ultimoPorVeiculo = {};
+
+      registros.forEach((reg) => {
+        const vId = reg.veiculo_id;
+        if (!ultimoPorVeiculo[vId]) {
+          ultimoPorVeiculo[vId] = reg;
+        }
+      });
+
+      const abertos = Object.values(ultimoPorVeiculo).filter(
+        (reg) => reg.tipo === "entrada"
+      );
+
+      res.status(200).json(abertos);
+    } catch (error) {
+      console.error("Erro ao buscar registros abertos:", error);
+      res.status(500).json({ message: "Erro ao buscar registros abertos" });
+    }
+  },
 };
 
 export default registroController;
